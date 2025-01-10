@@ -1,20 +1,22 @@
 ﻿@model IEnumerable<Person>
 
-<h1>Uploaded Persons</h1>
+<h1>Contact Managers</h1>
 
 <form asp-action="UploadCsv" asp-controller="Home" enctype="multipart/form-data" method="post">
     <input type="file" name="file" />
     <button type="submit">Upload CSV</button>
 </form>
 
-<table class="table">
+<input type="text" id="filterInput" placeholder="Filter by any column..." onkeyup="filterTable()" class="form-control" style="margin-top: 30px; margin-bottom: 30px; width: 300px;" />
+
+<table class="table" id="personsTable">
     <thead>
         <tr>
-            <th>Name</th>
-            <th>Date of Birth</th>
-            <th>Married</th>
-            <th>Phone</th>
-            <th>Salary</th>
+            <th onclick="sortTable(0)">Name</th>
+            <th onclick ="sortTable(1)">Date of Birth</th>
+            <th onclick="sortTable(2)">Married</th>
+            <th onclick="sortTable(3)">Phone</th>
+            <th onclick="sortTable(4)">Salary</th>
         </tr>
     </thead>
     <tbody>
@@ -30,3 +32,49 @@
         }
     </tbody>
 </table>
+
+<script>
+    function filterTable() {
+        const input = document.getElementById("filterInput").value.toLowerCase();
+        const table = document.getElementById("personsTable");
+        const rows = table.getElementsByTagName("tr");
+
+        for (let i = 1; i < rows.length; i++) {
+            const cells = rows[i].getElementsByTagName("td");
+            let matches = false;
+
+            for (let j = 0; j < cells.length; j++) {
+                if (cells[j].innerText.toLowerCase().includes(input)) {
+                    matches = true;
+                    break;
+                }
+            }
+
+            rows[i].style.display = matches ? "" : "none";
+        }
+    }
+
+    function sortTable(columnIndex) {
+        const table = document.getElementById("personsTable");
+        const rows = Array.from(table.getElementsByTagName("tr")).slice(1);
+        const isAscending = table.getAttribute(`data-sort-${columnIndex}`) !== "asc";
+
+        rows.sort((a, b) => {
+            const cellA = a.getElementsByTagName("td")[columnIndex].innerText.trim();
+            const cellB = b.getElementsByTagName("td")[columnIndex].innerText.trim();
+
+            if (!isNaN(cellA) && !isNaN(cellB)) {
+                return isAscending ? cellA - cellB : cellB - cellA;
+            }
+
+            return isAscending
+                ? cellA.localeCompare(cellB)
+                : cellB.localeCompare(cellA);
+        });
+
+        const tbody = table.getElementsByTagName("tbody")[0];
+        rows.forEach(row => tbody.appendChild(row));
+
+        table.setAttribute(`data-sort-${columnIndex}`, isAscending ? "asc" : "desc");
+    }
+</script>
