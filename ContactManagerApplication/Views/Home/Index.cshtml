@@ -1,0 +1,32 @@
+﻿@model IEnumerable<Person>
+
+<h1>Uploaded Persons</h1>
+
+<form asp-action="UploadCsv" asp-controller="Home" enctype="multipart/form-data" method="post">
+    <input type="file" name="file" />
+    <button type="submit">Upload CSV</button>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Date of Birth</th>
+            <th>Married</th>
+            <th>Phone</th>
+            <th>Salary</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var person in Model)
+        {
+            <tr>
+                <td>@person.Name</td>
+                <td>@person.DateOfBirth.ToShortDateString()</td>
+                <td>@person.Married</td>
+                <td>@person.Phone</td>
+                <td>@person.Salary</td>
+            </tr>
+        }
+    </tbody>
+</table>
