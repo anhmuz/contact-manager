@@ -18,6 +18,7 @@ namespace EntityFramework.Entities
         {
             return new PersonModel
             {
+                Id = this.Id,
                 Name = this.Name ?? string.Empty,
                 DateOfBirth = this.DateOfBirth ?? DateTime.MinValue,
                 Married = this.Married ?? false,
@@ -30,6 +31,7 @@ namespace EntityFramework.Entities
         {
             return new Person
             {
+                Id = person.Id,
                 Name = person.Name,
                 DateOfBirth = person.DateOfBirth,
                 Married = person.Married,

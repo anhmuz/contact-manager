@@ -6,10 +6,20 @@ using System.Globalization;
 using CsvHelper;
 using Newtonsoft.Json;
 using EntityFramework.Entities;
+using Microsoft.EntityFrameworkCore;
+using PersonModel = ContactManagerApplication.Models.Person;
+using Newtonsoft.Json.Linq;
 
 namespace ContactManagerApplication.Controllers
 {
-	public class HomeController : Controller
+    public class PersonUpdateModel
+    {
+        public int Id { get; set; }
+        public string Field { get; set; }
+        public string Value { get; set; }
+    }
+
+    public class HomeController : Controller
 	{
 		private readonly ILogger<HomeController> _logger;
         private readonly ContactManagerContext _context;
@@ -21,15 +31,48 @@ namespace ContactManagerApplication.Controllers
             _context = context;
 		}
 
-		public IActionResult Index()
+		public async Task<IActionResult> Index()
         {
-            var personsJson = TempData["Persons"] as string;
-            if (personsJson != null)
+            //var personsJson = TempData["Persons"] as string;
+            //if (personsJson != null)
+            //{
+            //    _persons = JsonConvert.DeserializeObject<List<Models.Person>>(personsJson) ?? new List<Models.Person>();
+            //}
+
+            //return View(_persons);
+
+            return View(await _context.Persons.Select(person => person.ToPersonModel()).ToListAsync());
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdatePerson([FromBody] PersonUpdateModel model)
+        {
+            if (model == null || string.IsNullOrWhiteSpace(model.Field) || string.IsNullOrWhiteSpace(model.Value))
             {
-                _persons = JsonConvert.DeserializeObject<List<Models.Person>>(personsJson) ?? new List<Models.Person>();
+                return Json(new { success = false, message = "Invalid data." });
             }
 
-            return View(_persons);
+            var person = await _context.Persons.FindAsync(model.Id);
+            if (person == null)
+            {
+                return Json(new { success = false, message = "Person not found." });
+            }
+
+            // Update the field dynamically
+            switch (model.Field)
+            {
+                case "Name":
+                    person.Name = model.Value;
+                    break;
+                // Add cases for other fields if needed
+                default:
+                    return Json(new { success = false, message = "Invalid field." });
+            }
+
+            await _context.SaveChangesAsync();
+            return Json(new { success = true });
+
+            return View();
         }
 
         [HttpPost]
@@ -60,7 +103,10 @@ namespace ContactManagerApplication.Controllers
                         }
                     }
                 }
-			}
+            }
+
+            await _context.Persons.AddRangeAsync(persons.Select(EntityFramework.Entities.Person.FromPersonModel));
+            await _context.SaveChangesAsync();
 
             TempData["Persons"] = JsonConvert.SerializeObject(persons);
             TempData["Success"] = "File uploaded and data processed successfully.";
