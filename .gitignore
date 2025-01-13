@@ -1,3 +1,5 @@
 /.vs/
 /ContactManagerApplication/bin/
 /ContactManagerApplication/obj/
+/EntityFramework/bin/
+/EntityFramework/obj/

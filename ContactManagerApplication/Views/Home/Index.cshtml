@@ -17,17 +17,21 @@
             <th onclick="sortTable(2)">Married</th>
             <th onclick="sortTable(3)">Phone</th>
             <th onclick="sortTable(4)">Salary</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var person in Model)
         {
             <tr>
-                <td>@person.Name</td>
-                <td>@person.DateOfBirth.ToShortDateString()</td>
-                <td>@person.Married</td>
-                <td>@person.Phone</td>
-                <td>@person.Salary</td>
+                <td contenteditable ="true">@person.Name</td>
+                <td contenteditable="true">@person.DateOfBirth.ToShortDateString()</td>
+                <td contenteditable="true">@person.Married</td>
+                <td contenteditable="true">@person.Phone</td>
+                <td contenteditable="true">@person.Salary</td>
+                <td>
+                    <button class="btn btn-danger btn-sm" onclick="deleteRow(this)">Delete</button>
+                </td>
             </tr>
         }
     </tbody>
@@ -76,5 +80,10 @@
         rows.forEach(row => tbody.appendChild(row));
 
         table.setAttribute(`data-sort-${columnIndex}`, isAscending ? "asc" : "desc");
+    }
+    
+    function deleteRow(button) {
+        const row = button.parentNode.parentNode;
+        row.remove();
     }
 </script>

@@ -5,17 +5,20 @@ using System.Formats.Asn1;
 using System.Globalization;
 using CsvHelper;
 using Newtonsoft.Json;
+using EntityFramework.Entities;
 
 namespace ContactManagerApplication.Controllers
 {
 	public class HomeController : Controller
 	{
 		private readonly ILogger<HomeController> _logger;
-		private IEnumerable<Person> _persons = new List<Person>();
+        private readonly ContactManagerContext _context;
+        private IEnumerable<Models.Person> _persons = new List<Models.Person>();
 
-		public HomeController(ILogger<HomeController> logger)
+		public HomeController(ILogger<HomeController> logger, ContactManagerContext context)
 		{
 			_logger = logger;
+            _context = context;
 		}
 
 		public IActionResult Index()
@@ -23,7 +26,7 @@ namespace ContactManagerApplication.Controllers
             var personsJson = TempData["Persons"] as string;
             if (personsJson != null)
             {
-                _persons = JsonConvert.DeserializeObject<List<Person>>(personsJson) ?? new List<Person>();
+                _persons = JsonConvert.DeserializeObject<List<Models.Person>>(personsJson) ?? new List<Models.Person>();
             }
 
             return View(_persons);
@@ -38,13 +41,13 @@ namespace ContactManagerApplication.Controllers
                 return RedirectToAction("Index");
             }
 
-            var persons = new List<Person>();
+            var persons = new List<Models.Person>();
 
             using (var stream = new StreamReader(file.OpenReadStream()))
 			{
 				using (var csvReader = new CsvReader(stream, CultureInfo.InvariantCulture))
                 {
-                    await foreach (var person in csvReader.GetRecordsAsync<Person>())
+                    await foreach (var person in csvReader.GetRecordsAsync<Models.Person>())
 					{
 						if (TryValidateModel(person))
                         {

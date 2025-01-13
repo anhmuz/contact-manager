@@ -1,7 +1,18 @@
+using EntityFramework.Entities;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddDbContext<ContactManagerContext>(opt => opt.UseInMemoryDatabase("test"));
+
+//var dbContextBuilder = new DbContextOptionsBuilder<ContactManagerContext>();
+//dbContextBuilder.UseInMemoryDatabase(databaseName: "database_name");
+
+//builder.Services.AddDbContext<ContactManagerContext>(dbContextBuilder);
 
 var app = builder.Build();
 
