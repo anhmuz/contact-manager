@@ -1,6 +1,6 @@
 ﻿@model IEnumerable<Person>
 
-<h1>Contact Managers</h1>
+<h1>Contact Managers</h1> 
 
 <form asp-action="CreatePersons" asp-controller="Home" enctype="multipart/form-data" method="post">
     <input type="file" name="file" />
@@ -30,7 +30,7 @@
                 <td contenteditable="true" data-id="@person.Id" data-field="Phone">@person.Phone</td>
                 <td contenteditable="true" data-id="@person.Id" data-field="Salary">@person.Salary</td>
                 <td>
-                    <button class="btn btn-danger btn-sm" onclick="deleteRow(this)">Delete</button>
+                    <button class="delete-button" data-id="@person.Id">Delete</button>
                 </td>
             </tr>
         }
@@ -56,6 +56,28 @@
             if (!result.success) {
                 alert('Failed to update person data: ' + result.message);
                 location.reload();
+            }
+        });
+    });
+
+    document.querySelectorAll('.delete-button').forEach(button => {
+        button.addEventListener('click', async () => {
+            const id = button.dataset.id;
+
+            const response = await fetch(`/Home/DeletePerson?id=${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert(result.message);
+                button.closest('tr').remove();
+            } else {
+                alert('Failed to delete person: ' + result.message);
             }
         });
     });

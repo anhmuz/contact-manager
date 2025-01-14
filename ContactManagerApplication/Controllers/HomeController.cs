@@ -135,6 +135,22 @@ namespace ContactManagerApplication.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpDelete]
+        public async Task<IActionResult> DeletePerson(int id)
+        {
+            var person = await _context.Persons.FindAsync(id);
+
+            if (person == null)
+            {
+                return Json(new { success = false, message = "Person not found." });
+            }
+
+            _context.Persons.Remove(person);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Person deleted successfully." });
+        }
+
         public IActionResult Privacy()
 		{
 			return View();
