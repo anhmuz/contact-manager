@@ -100,12 +100,12 @@ namespace ContactManagerApplication.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UploadCsv(IFormFile file)
+        public async Task<IActionResult> CreatePersons(IFormFile file)
         {
             if (file == null || file.Length == 0)
             {
-                TempData["Error"] = "Please upload a valid CSV file.";
-                return RedirectToAction("Index");
+                TempData["Error"] = "No CSV file selected or file is empty.";
+                return RedirectToAction(nameof(Index));
             }
 
             var persons = new List<Models.Person>();
@@ -122,8 +122,8 @@ namespace ContactManagerApplication.Controllers
 						}
 						else
                         {
-                            TempData["Error"] = "One or more records in the file are invalid.";
-                            return RedirectToAction("Index");
+                            TempData["Error"] = "Invalid model state.";
+                            return RedirectToAction(nameof(Index));
                         }
                     }
                 }
@@ -132,9 +132,7 @@ namespace ContactManagerApplication.Controllers
             await _context.Persons.AddRangeAsync(persons.Select(EntityFramework.Entities.Person.FromPersonModel));
             await _context.SaveChangesAsync();
 
-            TempData["Persons"] = JsonConvert.SerializeObject(persons);
-            TempData["Success"] = "File uploaded and data processed successfully.";
-            return RedirectToAction("Index");
+            return RedirectToAction(nameof(Index));
         }
 
         public IActionResult Privacy()
