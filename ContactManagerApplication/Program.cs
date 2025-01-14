@@ -1,20 +1,21 @@
 using EntityFramework.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<ContactManagerContext>(options =>
+				options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddDbContext<ContactManagerContext>(opt => opt.UseInMemoryDatabase("test"));
-
-//var dbContextBuilder = new DbContextOptionsBuilder<ContactManagerContext>();
-//dbContextBuilder.UseInMemoryDatabase(databaseName: "database_name");
-
-//builder.Services.AddDbContext<ContactManagerContext>(dbContextBuilder);
-
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ContactManagerContext>();
+    context.Database.EnsureCreated();
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
