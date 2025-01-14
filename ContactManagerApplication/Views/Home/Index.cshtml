@@ -25,10 +25,10 @@
         {
             <tr>
                 <td contenteditable="true" data-id="@person.Id" data-field="Name">@person.Name</td>
-                <td contenteditable="true">@person.DateOfBirth.ToShortDateString()</td>
-                <td contenteditable="true">@person.Married</td>
-                <td contenteditable="true">@person.Phone</td>
-                <td contenteditable="true">@person.Salary</td>
+                <td contenteditable="true" data-id="@person.Id" data-field="DateOfBirth">@person.DateOfBirth.ToShortDateString()</td>
+                <td contenteditable="true" data-id="@person.Id" data-field="Married">@person.Married</td>
+                <td contenteditable="true" data-id="@person.Id" data-field="Phone">@person.Phone</td>
+                <td contenteditable="true" data-id="@person.Id" data-field="Salary">@person.Salary</td>
                 <td>
                     <button class="btn btn-danger btn-sm" onclick="deleteRow(this)">Delete</button>
                 </td>
@@ -37,15 +37,13 @@
     </tbody>
 </table>
 
-<script>
-    
+<script>    
     document.querySelectorAll('td[contenteditable="true"]').forEach(cell => {
         cell.addEventListener('blur', async () => {
-            const id = cell.dataset.id; // Get the ID of the record
-            const field = cell.dataset.field; // Get the field name
-            const value = cell.textContent.trim(); // Get the new value
+            const id = cell.dataset.id;
+            const field = cell.dataset.field;
+            const value = cell.textContent.trim();
 
-            // Send updated data to the server
             const response = await fetch('/Home/UpdatePerson', {
                 method: 'PUT',
                 headers: {
@@ -56,7 +54,8 @@
 
             const result = await response.json();
             if (!result.success) {
-                alert('Update failed: ' + result.message);
+                alert('Failed to update person data: ' + result.message);
+                location.reload();
             }
         });
     });

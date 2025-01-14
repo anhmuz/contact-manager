@@ -1,29 +1,25 @@
 using ContactManagerApplication.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using System.Formats.Asn1;
 using System.Globalization;
 using CsvHelper;
 using Newtonsoft.Json;
 using EntityFramework.Entities;
 using Microsoft.EntityFrameworkCore;
-using PersonModel = ContactManagerApplication.Models.Person;
-using Newtonsoft.Json.Linq;
 
 namespace ContactManagerApplication.Controllers
 {
     public class PersonUpdateModel
     {
         public int Id { get; set; }
-        public string Field { get; set; }
-        public string Value { get; set; }
+        public string Field { get; set; } = default!;
+        public string Value { get; set; } = default!;
     }
 
     public class HomeController : Controller
 	{
 		private readonly ILogger<HomeController> _logger;
         private readonly ContactManagerContext _context;
-        private IEnumerable<Models.Person> _persons = new List<Models.Person>();
 
 		public HomeController(ILogger<HomeController> logger, ContactManagerContext context)
 		{
@@ -33,46 +29,74 @@ namespace ContactManagerApplication.Controllers
 
 		public async Task<IActionResult> Index()
         {
-            //var personsJson = TempData["Persons"] as string;
-            //if (personsJson != null)
-            //{
-            //    _persons = JsonConvert.DeserializeObject<List<Models.Person>>(personsJson) ?? new List<Models.Person>();
-            //}
-
-            //return View(_persons);
-
             return View(await _context.Persons.Select(person => person.ToPersonModel()).ToListAsync());
         }
 
         [HttpPut]
         public async Task<IActionResult> UpdatePerson([FromBody] PersonUpdateModel model)
         {
-            if (model == null || string.IsNullOrWhiteSpace(model.Field) || string.IsNullOrWhiteSpace(model.Value))
+            if (!ModelState.IsValid)
             {
-                return Json(new { success = false, message = "Invalid data." });
+                return Json(new { success = false, message = "Invalid model state." });
             }
 
             var person = await _context.Persons.FindAsync(model.Id);
+
             if (person == null)
             {
                 return Json(new { success = false, message = "Person not found." });
             }
 
-            // Update the field dynamically
+            string[] dateFormats = { "dd.MM.yyyy" };
             switch (model.Field)
             {
-                case "Name":
+                case nameof(person.Name):
                     person.Name = model.Value;
                     break;
-                // Add cases for other fields if needed
+
+                case nameof(person.DateOfBirth):
+                    if (DateTime.TryParseExact(model.Value, dateFormats, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateOfBirth))
+                    {
+                        person.DateOfBirth = dateOfBirth;
+                        break;
+                    }
+                    else
+                    {
+                        return Json(new { success = false, message = "Invalid value for 'Date of Birth'." });
+                    }
+
+                case nameof(person.Married):
+                    if (bool.TryParse(model.Value, out bool married))
+                    {
+                        person.Married = married;
+                        break;
+                    }
+                    else
+                    {
+                        return Json(new { success = false, message = "Invalid value for 'Married'." });
+                    }
+
+                case nameof(person.Phone):
+                    person.Phone = model.Value;
+                    break;
+
+                case nameof(person.Salary):
+                    if (decimal.TryParse(model.Value, out var salary))
+                    {
+                        person.Salary = salary;
+                        break;
+                    }
+                    else
+                    {
+                        return Json(new { success = false, message = "Invalid value for 'Salary'." });
+                    }
+
                 default:
                     return Json(new { success = false, message = "Invalid field." });
             }
 
             await _context.SaveChangesAsync();
-            return Json(new { success = true });
-
-            return View();
+            return Json(new { success = true, message = "Person data updated successfully." });
         }
 
         [HttpPost]
