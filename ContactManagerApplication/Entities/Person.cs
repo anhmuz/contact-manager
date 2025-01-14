@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Infrastructure;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using PersonModel = ContactManagerApplication.Models.Person;
 
 namespace EntityFramework.Entities
